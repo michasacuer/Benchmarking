@@ -5,59 +5,58 @@ using System.Linq;
 
 namespace Benchmarking
 {
-// for dataCount = 10000; 
-//
-// |        Method |      Mean |    Error |   StdDev |    Median |    Gen 0 | Gen 1 | Gen 2 | Allocated |
-// |-------------- |----------:|---------:|---------:|----------:|---------:|------:|------:|----------:|
-// | DoubleForeach |  87.83 ms | 1.676 ms | 1.646 ms |  87.31 ms |        - |     - |     - |     921 B |
-// |     LinqFirst | 155.37 ms | 3.101 ms | 6.806 ms | 152.76 ms | 250.0000 |     - |     - | 1280000 B |
+
+// data count = 10000
+// 
+// |        Method |     Mean |   Error |  StdDev |    Gen 0 | Gen 1 | Gen 2 | Allocated |
+// |-------------- |---------:|--------:|--------:|---------:|------:|------:|----------:|
+// |    BiggerLinq | 158.8 ms | 3.12 ms | 3.94 ms | 250.0000 |     - |     - |   1.22 MB |
+// | BiggerForeach | 153.2 ms | 3.05 ms | 6.10 ms | 250.0000 |     - |     - |   1.22 MB |
+
     [MemoryDiagnoser]
-    public class LinqDoubleLoop
+    public class LinqFirstListCount
     {
         int dataCount = 10000;
 
-        public LinqDoubleLoop()
+        public LinqFirstListCount()
         {
-            foreachA = InitializeClassA(dataCount);
-            foreachB = InitializeClassB(dataCount);
-            linqA = InitializeClassA(dataCount);
-            linqB = InitializeClassB(dataCount);
+            A1 = InitializeClassA(dataCount);
+            B1 = InitializeClassB(dataCount);
+            A2 = InitializeClassA(dataCount);
+            B2 = InitializeClassB(dataCount);
         }
 
-        public List<ClassA> foreachA { get; set; }
-        public List<ClassB> foreachB { get; set; }
-        public List<ClassA> linqA { get; set; }
-        public List<ClassB> linqB { get; set; }
+        public List<ClassA> A1 { get; set; }
+        public List<ClassB> B1 { get; set; }
+        public List<ClassA> A2 { get; set; }
+        public List<ClassB> B2 { get; set; }
 
         [Benchmark]
-        public List<ClassA> DoubleForeach()
+        public List<ClassA> BiggerLinq()
         {
-            foreach (var a in foreachA)
+            // bigger collection in linq
+            foreach (var b in B1)
             {
-                foreach (var b in foreachB)
-                {
-                    if (a.P3.Equals(b.P3))
-                    {
-                        a.P4 = b.P3;
-                        break;
-                    }
-                }
-            }
-
-            return foreachA;
-        }
-
-        [Benchmark]
-        public List<ClassA> LinqFirst()
-        {
-            foreach (var a in linqA)
-            {
-                var b = linqB.FirstOrDefault(x => x.P3.Equals(a.P3));
+                var a = A1.FirstOrDefault(x => x.P3.Equals(b.P3));
                 if (b != null)
                     a.P4 = b.P3;
             }
 
-            return linqA;
+            return A2;
+        }
+
+        [Benchmark]
+        public List<ClassA> BiggerForeach()
+        {
+            // bigger collection in foreach
+            foreach (var a in A2)
+            {
+                var b = B2.FirstOrDefault(x => x.P3.Equals(a.P3));
+                if (b != null)
+                    a.P4 = b.P3;
+            }
+
+            return A2;
         }
 
         public class ClassA
@@ -81,9 +80,9 @@ namespace Benchmarking
             for (int i = 0; i < dataCount; i++)
             {
                 Random random = new Random();
-                string field1 = random.Next(0, 1000).ToString(); 
-                string field2 = random.Next(0, 1000).ToString(); 
-                string field3 = random.Next(0, 1000).ToString(); 
+                string field1 = random.Next(0, 1000).ToString();
+                string field2 = random.Next(0, 1000).ToString();
+                string field3 = random.Next(0, 1000).ToString();
 
                 result.Add(new ClassA
                 {

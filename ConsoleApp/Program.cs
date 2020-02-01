@@ -1,6 +1,5 @@
 ﻿using BenchmarkDotNet.Running;
 using Benchmarking;
-using System;
 
 namespace ConsoleApp
 {
@@ -8,7 +7,7 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<LinqDoubleLoop>();
+            var summary = BenchmarkRunner.Run<LinqSelectForeach>();
         }
     }
 }
