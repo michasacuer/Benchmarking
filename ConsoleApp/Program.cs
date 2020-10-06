@@ -7,7 +7,7 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<HashAddListContains>();
+            var summary = BenchmarkRunner.Run<AddRangeVsConcat>();
         }
     }
 }
